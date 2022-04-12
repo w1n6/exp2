@@ -115,19 +115,38 @@ zstd                      1.4.9                h19a0ad4_0    https://mirrors.ust
 #编写人员：刘辉-西安邮电大学
 #编写日期：2021.08.06于西安市富力城
 
+
+# 建议看看这篇文章，了解一下神经网络相关概念，不会问我问老师
+# https://ml4a.github.io/ml4a/cn/neural_networks/
+
 import torch
 import torch.nn as nn
 from torch.nn.modules.activation import Softmax
 
 #模块，里面有两层卷积层，给定输入通道数和输出通道数即可
+
+#什么是类？
+# 类就是 一类对象的集合，可以理解为类型，对象就是类的实例化
+# 比如 人类: 类， 小明: 对象，工人:人类中的一种，是人类的子类
+# 写法: class 关键字加类名，()里加父类
+# 一个对象就是一系列数字和函数的集合，相当于C语言的结构体但是加上函数
+
+# 这个类给定输入通道和输出通道即可返回一个两层的卷积网络
 class Bottleneck(nn.Module):
+
+    #初始化函数 什么是初始化函数，就是这个类被初始化时调用的函数
     def __init__(self, in_channels, out_channels):
         super().__init__()
         
-        self.bottle_neck = nn.Sequential(
+        # 初始化瓶颈层,建立瓶颈层就是为了减少卷积网络通道的
+        self.bottle_neck = nn.Sequential( # 使用Sequential定义顺序模型
+            # 使用Conv2d建立卷积层
             nn.Conv2d(in_channels, in_channels, kernel_size=3, bias=True,padding=1),
+            # 建立一个归一化层
             nn.BatchNorm2d(in_channels),
-            nn.ReLU(inplace=True),           
+            # 激活函数
+            nn.ReLU(inplace=True), 
+            # 有两层网络 按顺序排列          
             nn.Conv2d(in_channels, out_channels, kernel_size=3, bias=True,padding=1),
             nn.BatchNorm2d(out_channels),#BN
             nn.ReLU(inplace=True),
@@ -136,6 +155,10 @@ class Bottleneck(nn.Module):
 
     def forward(self, x):
         return self.bottle_neck(x)
+
+# vgg10 vgg16 实际上是两种 神经网络 的构建方法 如果好奇可深入
+# 一文看懂什么是VGG https://zhuanlan.zhihu.com/p/41423739
+
 
 # 网络的输入图片一定要是128 128画幅的
 class vgg10(nn.Module):
@@ -202,13 +225,17 @@ class vgg16(nn.Module):
         return out_layer_1_2,out_layer_3_4,out_layer_5_6,out_layer_7_8,out_layer_9_10,out_layer_11_12,out_layer_13_14,out_layer_15,out_layer_16,out_softmax
 
 
+# 初始化神经网络权重
 def weights_init(m):
+    # 如果m是 (nn.Conv2d,nn.Linear) 中的一个子类, 即返回true
     if isinstance(m, (nn.Conv2d,nn.Linear)):
         # nn.init.xavier_uniform_(m.weight,gain=nn.init.calculate_gain('relu'))
-        nn.init.uniform_(m.weight,-0.5,0.5)
+        nn.init.uniform_(m.weight,-0.5,0.5)# 使用均匀分布初始化
         # if m.bias is not None:
         #    m.bias.data.zero_()
+    # 如果m是 nn.BatchNorm2d 的一个子类
     elif isinstance(m,nn.BatchNorm2d):
         nn.init.uniform_(m.weight,1)
+        # 设置偏置单元 https://www.cnblogs.com/shuaishuaidefeizhu/p/6832541.html
         if m.bias is not None:
            m.bias.data.zero_()

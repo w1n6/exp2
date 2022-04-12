@@ -111,22 +111,28 @@ zstd                      1.4.9                h19a0ad4_0    https://mirrors.ust
 #TensorBoard 2.5.0 at http://localhost:6006/ (Press CTRL+C to quit)
 #把地址放到浏览器里就可以查看模型了
 
+## 导入模块部分，相当于c语言的include 这篇文章可以看看 http://c.biancheng.net/view/2397.html
+## 导入模块即就能使用别人写好的函数，变量等代码
+## 这些库可以自己网上搜搜是什么，干什么的，怎么用，直接搜关键字
+from typing_extensions import ParamSpecKwargs 
+import cv2 as cv # opencv 一个图像处理的库
+import numpy as np # numpy 数据处理的库
+import glob # glob 匹配路径的库
+import os # 操作系统的库
+import argparse # 解析命令行参数的库
+import torch # pytorch 机器学习库
 
-from typing_extensions import ParamSpecKwargs
-import cv2 as cv
-import numpy as np
-import glob
-import os
-import argparse
-import torch
-import tools_imgio as imgio
-import tools_simple_cal as s_cal
-from net import vgg16
+## 下面都是老师写好的工具库(网上搜不到资料)，需要自己查看注释，阅读帮助，
+## 一般ctrl+单击进入查看库文件，不用自己找
+import tools_imgio as imgio #图片读取的一些工具函数
+import tools_simple_cal as s_cal #简单的计算工具函数
+from net import vgg16 
 from train import train
 from test import test
 from model_graph import model_graph
 
-train_data_path = '../data/train/'
+## 文件路径 建议翻一翻，知道那个目录是干啥的
+train_data_path = '../data/train/' 
 test_data_path = '../data/test/'
 val_data_path = '../data/val/'
 result_path = '../result/loss_0.01692/'
@@ -134,19 +140,28 @@ model_save_path = '../model_save3/'
 check_point_path = '../model_save3/net_params-epoch_00000039-loss_0.01692.pkl'
 # check_point_path = None
 
-#根据调用的命令参数，调用train还是test
-if __name__ == '__main__':
+#-------------main函数-------------#
+# 从这里开始 
+if __name__ == '__main__': #python中的main函数固定写法，不用细究
 
-    #判断是train还是test
+    # 这一段使用了argparse库来解析 程序输入的命令
+    # 可以上面翻翻是不是导入了argparse库，有一句 import argparse
+    # 命令行参数就是在黑窗口(就是cmd)运行程序时加的参数
+    # 比如说python main.py -mode train
+    # python main.py是程序 后面的-mode train就是命令行参数
     parser = argparse.ArgumentParser()
     parser.add_argument('-mode', action='store', dest='mode', type=str,
                         help='train or test ', required =False, default="test")
     args = parser.parse_args()
+    # 到这里这一段就完成了命令行的解析，具体这个库的用法，如果好奇可以自己搜索或者问我
+    # 总之 args.mode 就是执行程序时指定的"-mode"后面的参数
 
+    # 这一段的大意是判断result_path和model_save_path是否存在，如果不存在就创建
     if not os.path.exists(result_path):
         os.makedirs(result_path) #如果结果文件夹还没创建，就创建一下
     if not os.path.exists(model_save_path):
         os.makedirs(model_save_path) #如果结果文件夹还没创建，就创建一下
+
 
     #加载模型
     model = vgg16()
